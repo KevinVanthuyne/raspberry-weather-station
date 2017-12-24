@@ -1,4 +1,5 @@
 # coding=utf-8
+# !/usr/bin/env python3
 
 # Library used:
 # https://github.com/csparpa/pyowm
@@ -7,9 +8,11 @@ from luma.led_matrix.device import max7219
 from luma.core.interface.serial import spi, noop
 from luma.core.render import canvas
 from luma.core.legacy import text
-from luma.core.legacy.font import proportional, CP437_FONT, LCD_FONT, TINY_FONT
+from luma.core.legacy.font import proportional, TINY_FONT
 
 from pyowm import OWM
+
+import Adafruit_DHT as dht
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, Alignment
@@ -19,6 +22,7 @@ import os.path
 import datetime
 
 __excel_file_name = 'temperatures.xlsx'
+__DHT22_pin = 17  # GPIO pin on Raspberry Pi for DHT22 sensor (BCM number)
 
 def run():
     # Matrix setup
@@ -45,24 +49,41 @@ def run():
             # Peizegem city:
             obs = owm.weather_at_coords(50.978978, 4.211429)
 
+            # get outside weather
             weather = obs.get_weather()
-            temp = weather.get_temperature(unit = 'celsius')['temp']
-            timestamp = weather.get_reference_time(timeformat = 'iso')
+            timestamp = weather.get_reference_time()
+            day = datetime.datetime.fromtimestamp(timestamp).strftime('%d/%m/%Y')
+            hour = datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S')
+            outside_temp = weather.get_temperature(unit = 'celsius')['temp']
+
+            # get inside sensor readings
+            inside_humid, inside_temp = dht.read_retry(dht.DHT22, __DHT22_pin, retries = 15, delay_seconds = 1)
+            # if a reading could be gotten
+            if inside_humid is not None and inside_temp is not None:
+                inside_humid = round(inside_humid, 2)
+                inside_temp = round(inside_temp, 2)
+            else:
+                inside_temp = ""
+                inside_humid = ""
+
             # print some data
-            print("Fetched data is from: {}".format(timestamp))
-            print("it's now {}°C".format(temp))
+            print("Fetched data is from: {} {}".format(day, hour))
+            print("it's now {}°C".format(outside_temp))
             print("Short weather status: {}".format(weather.get_status()))
             print("Detailed weather status: {}".format(weather.get_detailed_status()))
             print("Sunrise: {}".format(weather.get_sunrise_time('iso')))
             print("Sunset: {}".format(weather.get_sunset_time('iso')))
             print("")
+            print("Inside temp: {}°C".format(inside_temp))
+            print("Inside humidity: {}%".format(inside_humid))
+            print("")
 
             # log data to Excel
-            write_to_excel(workbook, temp, timestamp)
+            write_to_excel(workbook, day, hour, outside_temp, inside_temp, inside_humid)
 
             # Display current temperature
             with canvas(device) as draw:
-                text(draw, (0, 0), str(temp), fill="white", font=proportional(TINY_FONT))
+                text(draw, (0, 0), str(outside_temp), fill="white", font=proportional(TINY_FONT))
             # Sleep 10 minutes
             time.sleep(10 * 60)
         else:
@@ -77,26 +98,37 @@ def create_excel():
     row = ws.row_dimensions[1]
     row.font = Font(bold = True)
     # fill in titles
-    ws.cell(row = 1, column = 1, value = "Outside temperature")
-    ws.cell(row = 1, column = 2, value = "Inside temperature")
-    ws.cell(row = 1, column = 3, value = "Timestamp")
+    ws.cell(row = 1, column = 1, value = "Day")
+    ws.cell(row = 1, column = 2, value = "Hour")
+    ws.cell(row = 1, column = 3, value = "Outside temperature (°C)")
+    ws.cell(row = 1, column = 4, value = "Inside temperature (°C)")
+    ws.cell(row = 1, column = 5, value = "Inside humidity (%)")
+
     # set column widths
-    ws.column_dimensions['A'].width = 5  # Outside temperature
-    ws.column_dimensions['B'].width = 5  # Inside temperature
-    ws.column_dimensions['C'].width = 25  # Date
+    ws.column_dimensions['A'].width = 12  # Day
+    ws.column_dimensions['B'].width = 10  # Hour
+    ws.column_dimensions['C'].width = 10  # Outside temperature
+    ws.column_dimensions['D'].width = 10  # Inside temperature
+    ws.column_dimensions['E'].width = 10  # Inside humidity
 
     # save the file
     wb.save(__excel_file_name)
 
-def write_to_excel(workbook, temp, timestamp):
+def write_to_excel(workbook, day, hour, outside_temp, inside_temp, inside_humid):
     sheet = workbook.active
+    # get next unused row
     row = sheet.max_row + 1
-    sheet.cell(row = row, column = 1, value = temp)
-    sheet.cell(row = row, column = 2, value = timestamp)
+    # write data to colums in row
+    sheet.cell(row = row, column = 1, value = day)
+    sheet.cell(row = row, column = 2, value = hour)
+    sheet.cell(row = row, column = 3, value = outside_temp)
+    sheet.cell(row = row, column = 4, value = inside_temp)
+    sheet.cell(row = row, column = 5, value = inside_humid)
+    # save the file
     workbook.save(__excel_file_name)
 
     print("Written to excel. Row {}".format(row))
-    print("")
+    print("------------------------------------")
 
 
 if __name__ == "__main__":
