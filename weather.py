@@ -32,6 +32,7 @@ def run():
     serial = spi(port = 0, device = 0, gpio = noop())
     device = max7219(serial)
     device.contrast(0)
+    screen_sleep = False
 
     # Weather setup
     API_key = '80393a1060ab07030ec77f53770a9760'
@@ -89,15 +90,22 @@ def run():
         # log data to Excel
         write_to_excel(workbook, day, hour, outside_temp, inside_temp, inside_humid)
 
-        # If it's not dark in the room
+        # If it's light in the room, show temperature
         # (Sensor output = 1 if dark, 0 if light)
         if not GPIO.input(__lightsensor_pin):
+            # If the screen is sleeping, wake it up
+            if screen_sleep:
+                device.show()
+                screen_sleep = False
+
             # Display current temperature
             with canvas(device) as draw:
                 text(draw, (0, 0), str(outside_temp), fill="white", font=proportional(TINY_FONT))
         else:
-            print("Device cleared")
-            device.clear()  # TODO device.show() and hide()
+            # If the screen is not sleeping, put it in sleep mode
+            if not screen_sleep:
+                device.hide()  # show() switches display off
+                screen_sleep = True
 
         # Sleep 5 minutes
         time.sleep(5 * 60)
