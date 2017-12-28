@@ -10,7 +10,7 @@ from luma.core.render import canvas
 from luma.core.legacy import text
 from luma.core.legacy.font import proportional, TINY_FONT
 
-from pyowm import OWM
+from pyowm import OWM, exceptions
 
 import Adafruit_DHT as dht
 
@@ -52,18 +52,38 @@ def run():
     # Main loop
     while True:
         now = datetime.datetime.now()
-        print("It's now: {}".format(datetime.datetime.now().time()))
-        # Get current weather info for Leuven
-        # obs = owm.weather_at_coords(50.875494, 4.711183) # Observation
-        # Peizegem city:
-        obs = owm.weather_at_coords(50.978978, 4.211429)
+        day = now.date()
+        hour = now.time()
+        print("It's now: {} {}".format(hour, day))
+        
+        try:
+            # Get current weather info for Leuven
+            # obs = owm.weather_at_coords(50.875494, 4.711183) # Observation
+            # Peizegem city:
+            obs = owm.weather_at_coords(50.978978, 4.211429)
 
-        # get outside weather
-        weather = obs.get_weather()
-        timestamp = weather.get_reference_time()
-        day = datetime.datetime.fromtimestamp(timestamp).strftime('%d/%m/%Y')
-        hour = datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S')
-        outside_temp = weather.get_temperature(unit = 'celsius')['temp']
+            # get outside weather
+            weather = obs.get_weather()
+            timestamp = weather.get_reference_time()
+            weather_day = datetime.datetime.fromtimestamp(timestamp).strftime('%d/%m/%Y')
+            weather_hour = datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S')
+            outside_temp = weather.get_temperature(unit = 'celsius')['temp']
+        
+            # print outside weather info
+            print("Fetched data is from: {} {}".format(weather_day, weather_hour))
+            print("it's now {}°C".format(outside_temp))
+            print("Short weather status: {}".format(weather.get_status()))
+            print("Detailed weather status: {}".format(weather.get_detailed_status()))
+            print("Sunrise: {}".format(weather.get_sunrise_time('iso')))
+            print("Sunset: {}".format(weather.get_sunset_time('iso')))
+            print("")
+        # If the system if offline/API is not available
+        except exceptions.api_call_error.APICallError:
+            print("System offline")
+            # fill in blank values as input
+            weather_day = ""
+            weather_hour = ""
+            outside_temp = ""
 
         # get inside sensor readings
         inside_humid, inside_temp = dht.read_retry(dht.DHT22, __DHT22_pin, retries = 5, delay_seconds = 1)
@@ -75,20 +95,13 @@ def run():
             inside_temp = ""
             inside_humid = ""
 
-        # print some data
-        print("Fetched data is from: {} {}".format(day, hour))
-        print("it's now {}°C".format(outside_temp))
-        print("Short weather status: {}".format(weather.get_status()))
-        print("Detailed weather status: {}".format(weather.get_detailed_status()))
-        print("Sunrise: {}".format(weather.get_sunrise_time('iso')))
-        print("Sunset: {}".format(weather.get_sunset_time('iso')))
-        print("")
+        # print inside data
         print("Inside temp: {}°C".format(inside_temp))
         print("Inside humidity: {}%".format(inside_humid))
         print("")
 
         # log data to Excel
-        write_to_excel(workbook, day, hour, outside_temp, inside_temp, inside_humid)
+        write_to_excel(workbook, day, hour, weather_hour, outside_temp, inside_temp, inside_humid)
 
         # If it's light in the room, show temperature
         # (Sensor output = 1 if dark, 0 if light)
@@ -97,6 +110,7 @@ def run():
             if screen_sleep:
                 device.show()
                 screen_sleep = False
+                print("Woke up screen")
 
             # Display current temperature
             with canvas(device) as draw:
@@ -106,6 +120,7 @@ def run():
             if not screen_sleep:
                 device.hide()  # show() switches display off
                 screen_sleep = True
+                print("Put screen to sleep")
 
         # Sleep 5 minutes
         time.sleep(5 * 60)
@@ -121,30 +136,33 @@ def create_excel():
     # fill in titles
     ws.cell(row = 1, column = 1, value = "Day")
     ws.cell(row = 1, column = 2, value = "Hour")
-    ws.cell(row = 1, column = 3, value = "Outside temperature (°C)")
-    ws.cell(row = 1, column = 4, value = "Inside temperature (°C)")
-    ws.cell(row = 1, column = 5, value = "Inside humidity (%)")
+    ws.cell(row = 1, column = 3, value = "Weather hour")
+    ws.cell(row = 1, column = 4, value = "Outside temperature (°C)")
+    ws.cell(row = 1, column = 5, value = "Inside temperature (°C)")
+    ws.cell(row = 1, column = 6, value = "Inside humidity (%)")
 
     # set column widths
     ws.column_dimensions['A'].width = 12  # Day
     ws.column_dimensions['B'].width = 10  # Hour
-    ws.column_dimensions['C'].width = 10  # Outside temperature
-    ws.column_dimensions['D'].width = 10  # Inside temperature
-    ws.column_dimensions['E'].width = 10  # Inside humidity
+    ws.column_dimensions['C'].width = 10  # Weather hour
+    ws.column_dimensions['D'].width = 10  # Outside temperature
+    ws.column_dimensions['E'].width = 10  # Inside temperature
+    ws.column_dimensions['F'].width = 10  # Inside humidity
 
     # save the file
     wb.save(__excel_file_name)
 
-def write_to_excel(workbook, day, hour, outside_temp, inside_temp, inside_humid):
+def write_to_excel(workbook, day, hour, weather_hour, outside_temp, inside_temp, inside_humid):
     sheet = workbook.active
     # get next unused row
     row = sheet.max_row + 1
     # write data to colums in row
     sheet.cell(row = row, column = 1, value = day)
     sheet.cell(row = row, column = 2, value = hour)
-    sheet.cell(row = row, column = 3, value = outside_temp)
-    sheet.cell(row = row, column = 4, value = inside_temp)
-    sheet.cell(row = row, column = 5, value = inside_humid)
+    sheet.cell(row = row, column = 3, value = weather_hour)
+    sheet.cell(row = row, column = 4, value = outside_temp)
+    sheet.cell(row = row, column = 5, value = inside_temp)
+    sheet.cell(row = row, column = 6, value = inside_humid)
     # save the file
     workbook.save(__excel_file_name)
 
