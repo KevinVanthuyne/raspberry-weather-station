@@ -1,10 +1,11 @@
 import sqlite3
 
 class Database:
-    """ Database for storing all weather readings """
+    """ Class to interact with SQLite database for storing all weather readings.
+        Database needs to contain a table 'reading' """
 
     def __init__(self, db_file):
-        self.db_file = db_file
+        self.db_file = db_file  # name of the database file
 
     def create_connection(self):
         """ Create a connection to the database
@@ -28,6 +29,8 @@ class Database:
 
         connection.close()
 
+        print("Reading added to database")
+
     def get_all_readings(self):
         connection = self.create_connection()
         cursor = connection.cursor()
@@ -36,6 +39,12 @@ class Database:
             print(row)
 
         connection.close()
+
+    def create_table(self):
+        """ Creates a 'reading' table in the database according to
+            the necessary input """
+        # TODO
+        pass
 
 # DEBUG
 if __name__ == '__main__':
