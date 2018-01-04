@@ -4,17 +4,9 @@
 # Library used:
 # https://github.com/csparpa/pyowm
 
-from luma.led_matrix.device import max7219
-from luma.core.interface.serial import spi, noop
-from luma.core.render import canvas
-from luma.core.legacy import text
-from luma.core.legacy.font import proportional, TINY_FONT
-
 from pyowm import OWM, exceptions
 
 import Adafruit_DHT as dht
-
-import sqlite3
 
 import RPi.GPIO as GPIO
 
@@ -24,7 +16,7 @@ import datetime
 
 # from excel import Excel
 from database import Database
-
+from screen import Screen
 
 
 class WeatherStation:
@@ -43,15 +35,9 @@ class WeatherStation:
         """ --------------------------------------------------------------------------------- """
 
         # Matrix setup
-        # TODO refactor to seperate class
-        serial = spi(port = 0, device = 0, gpio = noop())
-        self.device = max7219(serial)
-        self.device.contrast(0)
-        self.screen_sleep = False
-
+        self.screen = Screen()
         # Show X on screen to inform Pi is booting
-        with canvas(self.device) as draw:
-            text(draw, (0, 0), "X", fill="white", font=proportional(TINY_FONT))
+        self.screen.display("X")
 
         # OpenWeatherMaps object setup
         self.owm = OWM(API_key)
@@ -127,21 +113,18 @@ class WeatherStation:
             # (Sensor output = 1 if dark, 0 if light)
             if not GPIO.input(self.lightsensor_pin):
                 # If the screen is sleeping, wake it up
-                if self.screen_sleep:
-                    device.show()
-                    self.screen_sleep = False
-                    print("Woke up screen")
+                if self.screen.is_sleeping():
+                    self.screen.wake_up()
 
                 # Display current temperature
-                with canvas(self.device) as draw:
-                    text(draw, (0, 0), str(outside_temp), fill="white", font=proportional(TINY_FONT))
+                self.screen.display(str(outside_temp))
+
             else:
                 # If the screen is not sleeping, put it in sleep mode
-                if not self.screen_sleep:
-                    self.device.hide()  # show() switches display off
-                    self.screen_sleep = True
-                    print("Put screen to sleep")
+                if not self.screen.is_sleeping():
+                    self.screen.go_to_sleep()
 
+            print("-----------------------------------------------------------")
             # Sleep 5 minutes
             time.sleep(5 * 60)
 
