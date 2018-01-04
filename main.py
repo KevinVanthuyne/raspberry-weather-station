@@ -38,7 +38,7 @@ class WeatherStation:
         API_key = '80393a1060ab07030ec77f53770a9760'  # OpenWeatherMaps API key
 
         # Now using SQLite, if you prefer loggin to Excel, swap all Excel and Database lines
-        db_file = 'weatherdata.db'
+        db_file = 'weatherdata.db' # name of the database file
         # excel_file_name = '/home/pi/Programs/Weerstation/temperatures.xlsx'
         """ --------------------------------------------------------------------------------- """
 
@@ -120,8 +120,8 @@ class WeatherStation:
             # self.excel.write_to_excel(day, hour, weather_hour, outside_temp, inside_temp, inside_humid)
 
             # log data to SQLite database
-            # TODO fix this
-            # self.db.add_reading((day, hour, weather_hour, outside_temp, inside_temp, inside_humid))
+            reading = (day, str(hour), str(weather_hour), outside_temp, inside_temp, inside_humid)
+            self.db.add_reading(reading)
 
             # If it's light in the room, show temperature
             # (Sensor output = 1 if dark, 0 if light)

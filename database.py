@@ -20,25 +20,20 @@ class Database:
         return None
 
     def add_reading(self, reading):
-        connection = self.create_connection()
+        with self.create_connection() as conn:
+            query =  '''INSERT INTO reading (date, time, weather_time, outside_temp, inside_temp, inside_humid)
+                        VALUES (?, ?, ?, ?, ?, ?);'''
+            cursor = conn.cursor()
+            cursor.execute(query, reading)
 
-        query =  '''INSERT INTO reading (date, time, weather_time, outside_temp, inside_temp, inside_humid)
-                    VALUES (?, ?, ?, ?, ?, ?);'''
-        cursor = connection.cursor()
-        cursor.execute(query, reading)
-
-        connection.close()
-
-        print("Reading added to database")
+            print("Reading {} added to database".format(cursor.lastrowid))
 
     def get_all_readings(self):
-        connection = self.create_connection()
-        cursor = connection.cursor()
+        with self.create_connection() as conn:
+            cursor = conn.cursor()
 
-        for row in cursor.execute('SELECT * from reading'):
-            print(row)
-
-        connection.close()
+            for row in cursor.execute('SELECT * from reading'):
+                print(row)
 
     def create_table(self):
         """ Creates a 'reading' table in the database according to
