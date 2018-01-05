@@ -3,3 +3,4 @@ weatherdata.db
 dht22test.py
 matrixtest.py
 __pycache__/*
+log.txt
