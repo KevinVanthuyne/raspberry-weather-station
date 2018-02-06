@@ -9,14 +9,23 @@ class Screen:
 
     def __init__(self):
         serial = spi(port = 0, device = 0, gpio = noop())
-        self.device = max7219(serial)
+        # initialize a device of 3 matrices wide (24 leds) and 2 matrices high (16 leds)
+        self.device = max7219(serial, width = 24, height = 16, block_orientation=-90)
+        # set brightness to lowest
         self.device.contrast(0)
         self.screen_sleep = False  # variable to know if screen is in sleep mode
 
-    def display(self, string):
-        """ Display a string on the matrix screen """
+    def display(self, top_right, bottom_right):
+        """ Display given strings on the matrix screen on corresponding locations """
         with canvas(self.device) as draw:
-            text(draw, (0, 0), string, fill="white", font=proportional(TINY_FONT))
+            text(draw, (17, 0), top_right, fill="white", font=TINY_FONT)
+            text(draw, (17, 8), bottom_right, fill="white", font=TINY_FONT)
+
+    def display_startup(self):
+        """ Show info on screen to inform Pi is booting """
+        with canvas(self.device) as draw:
+            text(draw, (4, 1), "BOOT", fill="white", font=TINY_FONT)
+            text(draw, (6, 7), "ING..", fill="white", font=TINY_FONT)
 
     def is_sleeping(self):
         return self.screen_sleep

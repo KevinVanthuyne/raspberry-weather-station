@@ -23,7 +23,7 @@ class WeatherStation:
         print("")
 
     def get_outside_weather(self):
-        # blank values for if system is offline
+        # blank values when system is offline
         weather_hour = ""
         outside_temp = ""
         try:

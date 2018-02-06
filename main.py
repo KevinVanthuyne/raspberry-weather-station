@@ -22,8 +22,8 @@ if __name__ == "__main__":
     try:
         """ Setup of all the components """
         screen = Screen()
-        # Show X on screen to inform Pi is booting
-        screen.display("X")
+        # Show info on screen to inform Pi is booting
+        screen.display_startup()
 
         db = Database(db_file)
         # self.excel = Excel(excel_file_name)
@@ -58,8 +58,8 @@ if __name__ == "__main__":
                 if screen.is_sleeping():
                     screen.wake_up()
 
-                # Display current temperature
-                screen.display(str(outside_temp))
+                # Display current temperatures
+                screen.display(str(round(outside_temp)), str(round(inside_temp)))
             # If it's dark
             else:
                 # If the screen is not sleeping, put it in sleep mode
