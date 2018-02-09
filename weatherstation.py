@@ -20,9 +20,11 @@ class WeatherStation:
         print("Detailed weather status: {}".format(weather.get_detailed_status()))
         print("Sunrise: {}".format(weather.get_sunrise_time('iso')))
         print("Sunset: {}".format(weather.get_sunset_time('iso')))
+        print("Icon: {}".format(weather.get_weather_icon_name()))
         print("")
 
     def get_outside_weather(self):
+        """ returns the hour of weatherdata, outside temperature and the weather icon """
         # blank values when system is offline
         weather_hour = ""
         outside_temp = ""
@@ -37,6 +39,7 @@ class WeatherStation:
             weather_day = datetime.datetime.fromtimestamp(timestamp).strftime('%d/%m/%Y')
             weather_hour = datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S')
             outside_temp = weather.get_temperature(unit = 'celsius')['temp']
+            icon = weather.get_weather_icon_name()
 
             # print outside weather info
             self.print_outside_weather(weather, weather_day, weather_hour)
@@ -45,7 +48,7 @@ class WeatherStation:
         except exceptions.api_call_error.APICallError:
             print("System offline")
 
-        return (weather_hour, outside_temp)
+        return (weather_hour, outside_temp, icon)
 
     def get_inside_data(self):
         # get inside sensor readings

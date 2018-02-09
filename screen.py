@@ -15,11 +15,12 @@ class Screen:
         self.device.contrast(0)
         self.screen_sleep = False  # variable to know if screen is in sleep mode
 
-    def display(self, top_right, bottom_right):
-        """ Display given strings on the matrix screen on corresponding locations """
+    def display(self, top_right, bottom_right, img):
+        """ Display given strings and icon on the matrix screen on corresponding locations """
         with canvas(self.device) as draw:
             text(draw, (17, 0), top_right, fill="white", font=TINY_FONT)
             text(draw, (17, 8), bottom_right, fill="white", font=TINY_FONT)
+            draw.bitmap((0,0), img, fill="white")
 
     def display_startup(self):
         """ Show info on screen to inform Pi is booting """

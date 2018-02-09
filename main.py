@@ -2,6 +2,7 @@
 
 import time
 import datetime
+from PIL import Image
 
 from weatherstation import WeatherStation
 from database import Database
@@ -40,7 +41,7 @@ if __name__ == "__main__":
             print("It's now: {} {}".format(hour, day))
 
             # Get outside weather
-            weather_hour, outside_temp = station.get_outside_weather()
+            weather_hour, outside_temp, icon = station.get_outside_weather()
 
             # Get inside data
             inside_humid, inside_temp = station.get_inside_data()
@@ -58,8 +59,11 @@ if __name__ == "__main__":
                 if screen.is_sleeping():
                     screen.wake_up()
 
-                # Display current temperatures
-                screen.display(str(round(outside_temp)), str(round(inside_temp)))
+                # get the icon image to display
+                icon_path = "icons/{}.bmp".format(icon[:2])
+                img = Image.open(icon_path)
+                # Display current temperatures and icon
+                screen.display(str(round(outside_temp)), str(round(inside_temp)), img)
             # If it's dark
             else:
                 # If the screen is not sleeping, put it in sleep mode
