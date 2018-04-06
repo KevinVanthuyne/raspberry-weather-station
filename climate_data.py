@@ -4,8 +4,8 @@ import Adafruit_DHT as dht
 
 import datetime
 
-class WeatherStation:
-    """ Inside and outside temperature logging"""
+class ClimateData:
+    """ Retrieves and logs inside and outside climate data"""
 
     def __init__(self, DHT22_pin, API_key):
         # Temperature & humidity sensor pin
