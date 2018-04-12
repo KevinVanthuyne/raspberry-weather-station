@@ -43,26 +43,6 @@ class Screen:
             text(draw, (4, 1), "BOOT", fill="white", font=TINY_FONT)
             text(draw, (6, 7), "ING..", fill="white", font=TINY_FONT)
 
-    def display_args(self, *args):
-        # if one string argument is given
-        if len(args) == 1 and isinstance(args[0], str):
-            # display in bottom right
-            with canvas(self.device) as draw:
-                text(draw, (17, 8), args[0], fill="white", font=TINY_FONT)
-        # if one string and one bitmap argument are given
-        elif len(args) == 2 and isinstance(args[0], str) and isinstance(args[1], bitmap):
-            # display bitmap and top right
-            with canvas(self.device) as draw:
-                text(draw, (17, 0), top_right, fill="white", font=TINY_FONT)
-                draw.bitmap((0,0), img, fill="white")
-        # if two strings and one bitmap is given
-        elif len(args) == 3 and isinstance(args[0], str) and isinstance(args[1], str) and isinstance(args[2], bitmap):
-            # display everything
-            with canvas(self.device) as draw:
-                text(draw, (17, 0), top_right, fill="white", font=TINY_FONT)
-                text(draw, (17, 8), bottom_right, fill="white", font=TINY_FONT)
-                draw.bitmap((0,0), img, fill="white")
-
     def is_sleeping(self):
         return self.screen_sleep
 
