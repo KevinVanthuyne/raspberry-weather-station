@@ -15,6 +15,7 @@ class WeatherStation:
 
     def __init__(self, DHT22_pin, lightsensor_pin, API_key, db_file):
         """ Setup of all the components """
+
         self.screen = Screen()
         # Show info on screen to inform Pi is booting
         self.screen.display_startup()
@@ -30,6 +31,7 @@ class WeatherStation:
 
     def update(self):
         """ Update all weather station data """
+
         # update outside weather
         self.weather_hour, self.outside_temp, self.icon = self.climate.get_outside_weather()
 
@@ -46,6 +48,7 @@ class WeatherStation:
 
     def light_change(self, pin):
         """ interrupt handler for when a light change has been detected"""
+
         time.sleep(0.1)
 
         # if it's light in the room, wake up screen
@@ -63,19 +66,31 @@ class WeatherStation:
                 print("Put screen to sleep")
 
     def update_screen(self):
-        """ update information on the screen with current weather station data
+        """ update information on the screen with current weather station data.
             WeatherStation should be updated first with update() """
-        # get the icon image to display
-        icon_path = "icons/{}.bmp".format(self.icon[:2])
-        img = Image.open(icon_path)
-        # Display current temperatures and icon
-        self.screen.display(str(round(self.outside_temp)), str(round(self.inside_temp)), img)
 
+        outside_temp = None
+        inside_temp = None
+        img = None
+
+        # if outside weather is available
+        if self.weather_hour is not None:
+            outside_temp = str(round(self.outside_temp))
+            # get the icon image to display
+            icon_path = "icons/{}.bmp".format(self.icon[:2])
+            img = Image.open(icon_path)
+
+        #if inside weather is available
+        if self.inside_temp is not None:
+            inside_temp = str(round(self.inside_temp))
+
+        self.screen.display(outside_temp, inside_temp, img)
         print("Screen updated.")
 
     def log_to_db(self):
         """ Log the current weather station data to the database
             WeatherStation should be updated first with update() """
+
         # log data to Excel
         # self.excel.write_to_excel(self.day, self.hour, self.weather_hour, self.outside_temp, self.inside_temp, self.inside_humid)
 

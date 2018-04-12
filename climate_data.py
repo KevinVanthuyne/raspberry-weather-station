@@ -24,10 +24,14 @@ class ClimateData:
         print("")
 
     def get_outside_weather(self):
-        """ returns the hour of weatherdata, outside temperature and the weather icon """
-        # blank values when system is offline
-        weather_hour = ""
-        outside_temp = ""
+        """ returns the hour of the weatherdata, outside temperature and the weather icon.
+            returns None for all values if the API can't be reached. """
+
+        # empty values for when API can't be reached
+        weather_hour = None
+        outside_temp = None
+        icon = None
+
         try:
             # Get current weather info for coordinates
             # obs = owm.weather_at_coords(50.875494, 4.711183)
@@ -44,26 +48,26 @@ class ClimateData:
             # print outside weather info
             self.print_outside_weather(weather, weather_day, weather_hour)
 
-        # If the system if offline/API is not available
+        # if the system is offline/API is not available
         except exceptions.api_call_error.APICallError:
             print("System offline")
 
-        return (weather_hour, outside_temp, icon)
+        # return weather values
+        return weather_hour, outside_temp, icon
 
     def get_inside_data(self):
         # get inside sensor readings
-        inside_humid, inside_temp = dht.read_retry(dht.DHT22, self.DHT22_pin, retries = 5, delay_seconds = 2)
+        inside_humid, inside_temp = dht.read_retry(dht.DHT22, self.DHT22_pin)  #, retries = 3, delay_seconds = 2)
         # if a reading could be gotten
         if inside_humid is not None and inside_temp is not None:
             inside_humid = round(inside_humid, 2)
             inside_temp = round(inside_temp, 2)
+            # print inside data
+            print("Inside temp: {}°C".format(inside_temp))
+            print("Inside humidity: {}%".format(inside_humid))
         else:
-            inside_temp = ""
-            inside_humid = ""
+            print("Couldn't get inside readings.")
 
-        # print inside data
-        print("Inside temp: {}°C".format(inside_temp))
-        print("Inside humidity: {}%".format(inside_humid))
         print("")
 
         return inside_humid, inside_temp
