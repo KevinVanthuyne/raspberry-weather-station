@@ -36,12 +36,13 @@ class Screen:
                     draw.bitmap((0,0), img, fill="white")
         # if there are no items to display (all 3 are None)
         else:
-            print("No info to display on screen...")
+            self.display_text("ERROR")
 
     def display_text(self, string):
         """ displays between 1 and 12 characters on the screen in TINY_FONT
             Centers text vertically and horizontally, wrapping lines if necessary. """
         # TODO? make this really flexible with every possible width and height?
+        # TODO? make it wrap at spaces if possible
 
         chars = len(string)
         # if string is smaller than 6 characters
