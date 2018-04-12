@@ -18,7 +18,7 @@ class WeatherStation:
 
         self.screen = Screen()
         # Show info on screen to inform Pi is booting
-        self.screen.display_startup()
+        self.screen.display_text("BOOTING")
 
         self.db = Database(db_file)
         # self.excel = Excel(excel_file_name)
