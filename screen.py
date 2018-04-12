@@ -36,7 +36,7 @@ class Screen:
                     draw.bitmap((0,0), img, fill="white")
         # if there are no items to display (all 3 are None)
         else:
-            self.display_text("ERROR")
+            self.display_text("Error")
 
     def display_text(self, string):
         """ displays between 1 and 12 characters on the screen in TINY_FONT
