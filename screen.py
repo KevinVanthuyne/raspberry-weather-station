@@ -27,10 +27,14 @@ class Screen:
         if top_right is not None or bottom_right is not None or img is not None:
             with canvas(self.device) as draw:
                 if top_right is not None:
-                    text(draw, (17, 0), top_right, fill="white", font=TINY_FONT)
+                    text(draw, (17, -1), top_right, fill="white", font=TINY_FONT)
 
                 if bottom_right is not None:
-                    text(draw, (17, 8), bottom_right, fill="white", font=TINY_FONT)
+                    # draw a small roof over inside temperature
+                    draw.line((20, 7, 17, 9), fill="white")
+                    draw.line((20, 7, 23, 9), fill="white")
+
+                    text(draw, (17, 10), bottom_right, fill="white", font=TINY_FONT)
 
                 if img is not None:
                     draw.bitmap((0,0), img, fill="white")
