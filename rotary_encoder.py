@@ -20,6 +20,8 @@ class RotaryEncoder:
         self.clock_state = GPIO.input(self.clock_pin)
 
         self.counter = 0
+        # direction of movement, to eliminate half steps
+        self.direction = 0
 
     def read(self):
         # read the current states of the input pins
@@ -27,11 +29,22 @@ class RotaryEncoder:
         current_clock_state = GPIO.input(self.clock_pin)
 
         if current_clock_state != self.clock_state:
-            if current_data_state != current_clock_state:
-                self.counter += 1
-            else:
-                self.counter -= 1
+            # if no direction is set, set the direction first
+            if self.direction == 0:
+                # if both pins have a different value, the encoder is moving clockwise
+                if current_data_state != current_clock_state:
+                    self.direction = 1  # 1 == clockwise
+                # if both pins have the same value, the encoder is moving counter clockwise
+                else:
+                      self.direction = -1  # -1 == counter clockwise
 
-            print(self.counter)
+            # if a direction is set, change the counter
+            else:
+                self.counter += self.direction
+                # reset direction
+                self.direction = 0
+
+                print(self.counter)
+
             self.clock_state = current_clock_state
             sleep(0.01)

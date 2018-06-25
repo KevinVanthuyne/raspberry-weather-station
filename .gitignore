@@ -4,3 +4,6 @@ dht22test.py
 matrixtest.py
 __pycache__/*
 log.txt
+interrupt-test.py
+nohup.out
+rotary-encoder-test.py
