@@ -24,6 +24,9 @@ class RotaryEncoder:
         self.direction = 0
 
     def read(self):
+        """ Read the state of the rotary encoder and return -1 if the encoder moved
+            counter clockwise or 1 if it moved clockwise """
+
         # read the current states of the input pins
         current_data_state = GPIO.input(self.data_pin)
         current_clock_state = GPIO.input(self.clock_pin)
@@ -36,15 +39,14 @@ class RotaryEncoder:
                     self.direction = 1  # 1 == clockwise
                 # if both pins have the same value, the encoder is moving counter clockwise
                 else:
-                      self.direction = -1  # -1 == counter clockwise
+                    self.direction = -1  # -1 == counter clockwise
 
-            # if a direction is set, change the counter
+            # if a direction is set, reset it
             else:
-                self.counter += self.direction
-                # reset direction
                 self.direction = 0
-
-                print(self.counter)
 
             self.clock_state = current_clock_state
             sleep(0.01)
+
+            if self.direction != 0:
+                print(self.direction)
