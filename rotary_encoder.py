@@ -1,4 +1,5 @@
 import RPi.GPIO as GPIO
+import threading
 from time import sleep
 
 class RotaryEncoder:
@@ -23,30 +24,39 @@ class RotaryEncoder:
         # direction of movement, to eliminate half steps
         self.direction = 0
 
-    def read(self):
-        """ Read the state of the rotary encoder and return -1 if the encoder moved
-            counter clockwise or 1 if it moved clockwise """
+        self.lock = threading.Lock()
+
+    def read(self, channel):
+        """ Interrupt callback function called by both rotary encoder pins
+            to read the state of the rotary encoder and return -1 if
+            the encoder moved counter clockwise or 1 if it moved clockwise.
+
+            Parameters: channel = GPIO pin of interrupt """
 
         # read the current states of the input pins
         current_data_state = GPIO.input(self.data_pin)
         current_clock_state = GPIO.input(self.clock_pin)
 
-        if current_clock_state != self.clock_state:
-            # if no direction is set, set the direction first
-            if self.direction == 0:
-                # if both pins have a different value, the encoder is moving clockwise
-                if current_data_state != current_clock_state:
-                    self.direction = 1  # 1 == clockwise
-                # if both pins have the same value, the encoder is moving counter clockwise
-                else:
-                    self.direction = -1  # -1 == counter clockwise
-
-            # if a direction is set, reset it
-            else:
-                self.direction = 0
-
+        # ignore interrupt if the current states haven't changed from the previous ones
+        if current_data_state != self.data_state and current_clock_state != self.clock_state:
+            # update states with current states
+            self.data_state = current_data_state
             self.clock_state = current_clock_state
-            sleep(0.01)
 
-            if self.direction != 0:
-                return self.direction
+            # if both states are active
+            if (current_data_state and current_clock_state):
+                self.lock.acquire()
+                direction = 0
+                # if the channel that called the interrupt is the data pin,
+                # the encoder moved clockwise
+                if (channel == self.data_pin):
+                    direction = 1
+                # if the channel that called the interrupt is the clock pin,
+                # the encoder moved counter clockwise
+                elif (channel == self.clock_pin):
+                    direction = -1
+                self.lock.release()
+
+                return direction
+        else:
+            print("Not changed")
