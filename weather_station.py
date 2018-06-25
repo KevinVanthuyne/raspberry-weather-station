@@ -9,11 +9,13 @@ from climate_data import ClimateData
 from database import Database
 from screen import Screen
 from lightsensor import LightSensor
+from rotary_encoder import RotaryEncoder
+import pages as PAGES
 
 class WeatherStation:
     """ Facade class for all functionality of the weather station """
 
-    def __init__(self, DHT22_pin, lightsensor_pin, API_key, db_file):
+    def __init__(self, DHT22_pin, lightsensor_pin, re_data, re_clock, re_switch, API_key, db_file):
         """ Setup of all the components """
 
         self.screen = Screen()
@@ -24,10 +26,24 @@ class WeatherStation:
         # self.excel = Excel(excel_file_name)
 
         self.climate = ClimateData(DHT22_pin, API_key)
-        self.lightsensor = LightSensor(lightsensor_pin)
 
-        """ Setup interrupt for when light changes """
-        GPIO.add_event_detect(lightsensor_pin, GPIO.RISING, callback=self.light_change, bouncetime=200)
+        self.lightsensor = LightSensor(lightsensor_pin)
+        # Setup interrupt for when light changes
+        GPIO.add_event_detect(lightsensor_pin, GPIO.RISING, callback=self.light_changed, bouncetime=200)
+
+        self.rotary = RotaryEncoder(re_data, re_clock, re_switch)
+        # setup interrupts for rotary encoder is turned
+        GPIO.add_event_detect(re_data, GPIO.RISING, callback=self.rotary_encoder_changed)
+        GPIO.add_event_detect(re_clock, GPIO.RISING, callback=self.rotary_encoder_changed)
+
+        # setup different pages
+        self.pages = []
+        self.pages.append(PAGES.CurrentWeatherPage(self))
+        self.pages.append(PAGES.MinMaxTemperaturePage(self))
+
+        # index of the current page
+        self.current_page = 0
+
 
     def update(self):
         """ Update all weather station data """
@@ -43,10 +59,12 @@ class WeatherStation:
         self.day = now.date()
         self.hour = now.time()
 
+        # TODO update all pages with current weatherstation?
+
         print("Weather station updated at: {} {}".format(self.hour, self.day))
 
 
-    def light_change(self, pin):
+    def light_changed(self, pin):
         """ interrupt handler for when a light change has been detected"""
 
         time.sleep(0.1)
@@ -69,23 +87,48 @@ class WeatherStation:
         """ update information on the screen with current weather station data.
             WeatherStation should be updated first with update() """
 
-        outside_temp = None
-        inside_temp = None
-        img = None
+        self.pages[self.current_page].update()
 
-        # if outside weather is available
-        if self.weather_hour is not None:
-            outside_temp = str(round(self.outside_temp))
-            # get the icon image to display
-            icon_path = "icons/{}.bmp".format(self.icon[:2])
-            img = Image.open(icon_path)
+        # outside_temp = None
+        # inside_temp = None
+        # img = None
+        #
+        # # if outside weather is available
+        # if self.weather_hour is not None:
+        #     outside_temp = str(round(self.outside_temp))
+        #     # get the icon image to display
+        #     icon_path = "icons/{}.bmp".format(self.icon[:2])
+        #     img = Image.open(icon_path)
+        #
+        # #if inside weather is available
+        # if self.inside_temp is not None:
+        #     inside_temp = str(round(self.inside_temp))
+        #
+        # self.screen.display(outside_temp, inside_temp, img)
+        # print("Screen updated.")
 
-        #if inside weather is available
-        if self.inside_temp is not None:
-            inside_temp = str(round(self.inside_temp))
+    def rotary_encoder_changed(self, channel):
+        result = self.rotary.read(channel)
 
-        self.screen.display(outside_temp, inside_temp, img)
-        print("Screen updated.")
+        # show next page
+        if result == 1:
+            # if the index is at the last page, loop back to first page
+            if self.current_page == len(self.pages) - 1:
+                self.current_page = 0
+            else:
+                self.current_page += 1
+            print("Page up")
+
+        # show previous page
+        elif result == -1:
+            # if the index is at the first page, loop back to last page
+            if self.current_page == 0:
+                self.current_page = len(self.pages) - 1
+            else:
+                self.current_page -= 1
+            print("Page down")
+
+        self.update_screen()
 
     def log_to_db(self):
         """ Log the current weather station data to the database

@@ -54,5 +54,5 @@ class RotaryEncoder:
                 self.lock.release()
 
                 return direction
-        else:
-            print("Not changed")
+        # else:
+        #     print("Not changed")
