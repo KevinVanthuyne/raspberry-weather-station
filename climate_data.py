@@ -12,6 +12,11 @@ class ClimateData:
         self.DHT22_pin = DHT22_pin
         # OpenWeatherMaps object setup
         self.owm = OWM(API_key)
+        # Coordinates of the desired place to get weather info for
+        # Peizegem: 50.978978, 4.211429
+        # Leuven: 50.875494, 4.711183
+        self.coordinates = (50.978978, 4.211429)
+
 
     def print_outside_weather(self, weather, weather_day, weather_hour):
         print("Fetched data is from: {} {}".format(weather_day, weather_hour))
@@ -35,7 +40,7 @@ class ClimateData:
         try:
             # Get current weather info for coordinates
             # obs = owm.weather_at_coords(50.875494, 4.711183)
-            obs = self.owm.weather_at_coords(50.978978, 4.211429) # Peizegem
+            obs = self.owm.weather_at_coords(self.coordinates[0], self.coordinates[1])
 
             # get outside weather
             weather = obs.get_weather()
@@ -71,3 +76,34 @@ class ClimateData:
         print("")
 
         return inside_humid, inside_temp
+
+    def get_min_max(self):
+        try:
+            # Get 5 days of forecast info with data 3 hours apart
+            forecaster = self.owm.three_hours_forecast_at_coords(self.coordinates[0], self.coordinates[1])
+
+            # get weather object from forecaster closest to now
+            # weather = forecaster.get_weather_at(datetime.datetime.now())
+            weather = forecaster.get_forecast().get(0)
+
+            # get the day and time of the retrieved weather
+            timestamp = weather.get_reference_time()
+            weather_day = datetime.datetime.fromtimestamp(timestamp).strftime('%d/%m/%Y')
+            weather_hour = datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S')
+
+            # get the temperature info of the forecast
+            temp = weather.get_temperature(unit = 'celsius')
+
+            # print some info
+            print("Min and max temperatures retrieved are from: {} {}".format(weather_day, weather_hour))
+            print("Min: {}".format(temp['temp_min']))
+            print("Max: {}".format(temp['temp_max']))
+            print("")
+
+            return temp['temp_min'], temp['temp_max']
+
+        # if the system is offline/API is not available
+        except exceptions.api_call_error.APICallError:
+            print("System offline")
+
+    # TODO def get_today_forecast_min_temp(forecaster):

@@ -42,6 +42,18 @@ class Screen:
         else:
             self.display_text("Error")
 
+    def display_top_bottom(self, top, bottom):
+        """ displays one line at the top of the screen and one at the bottom """
+
+        if top and bottom:
+            with canvas(self.device) as draw:
+                text(draw, (0, 0), top, fill="white", font=TINY_FONT)
+                text(draw, (0, 8), bottom, fill="white", font=TINY_FONT)
+
+        else:
+            self.display_text("Error")
+
+
     def display_text(self, string):
         """ displays between 1 and 12 characters on the screen in TINY_FONT
             Centers text vertically and horizontally, wrapping lines if necessary. """

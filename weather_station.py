@@ -54,6 +54,9 @@ class WeatherStation:
         # update inside data
         self.inside_humid, self.inside_temp = self.climate.get_inside_data()
 
+        # update today's forcast data
+        self.today_min, self.today_max = self.climate.get_min_max()
+
         # update day & time of WeatherStation data with current day & time
         now = datetime.datetime.now()
         self.day = now.date()
@@ -89,24 +92,6 @@ class WeatherStation:
 
         self.pages[self.current_page].update()
 
-        # outside_temp = None
-        # inside_temp = None
-        # img = None
-        #
-        # # if outside weather is available
-        # if self.weather_hour is not None:
-        #     outside_temp = str(round(self.outside_temp))
-        #     # get the icon image to display
-        #     icon_path = "icons/{}.bmp".format(self.icon[:2])
-        #     img = Image.open(icon_path)
-        #
-        # #if inside weather is available
-        # if self.inside_temp is not None:
-        #     inside_temp = str(round(self.inside_temp))
-        #
-        # self.screen.display(outside_temp, inside_temp, img)
-        # print("Screen updated.")
-
     def rotary_encoder_changed(self, channel):
         result = self.rotary.read(channel)
 
@@ -118,6 +103,7 @@ class WeatherStation:
             else:
                 self.current_page += 1
             print("Page up")
+            self.update_screen()
 
         # show previous page
         elif result == -1:
@@ -127,8 +113,8 @@ class WeatherStation:
             else:
                 self.current_page -= 1
             print("Page down")
+            self.update_screen()
 
-        self.update_screen()
 
     def log_to_db(self):
         """ Log the current weather station data to the database

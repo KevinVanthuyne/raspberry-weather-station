@@ -47,4 +47,14 @@ class MinMaxTemperaturePage(Page):
         super().__init__(weather_station)
 
     def update(self):
-        self.weather_station.screen.display_text("MinMax")
+        outside_temp = None
+        inside_temp = None
+        img = None
+
+        # if a forecast is available
+        if self.weather_station.today_min is not None:
+            min = "Min:{}".format(str(round(self.weather_station.today_min)))
+            max = "Max:{}".format(str(round(self.weather_station.today_max)))
+
+        self.weather_station.screen.display_top_bottom(min, max)
+        print("Screen updated.")
