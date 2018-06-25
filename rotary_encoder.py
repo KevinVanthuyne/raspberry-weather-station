@@ -20,10 +20,6 @@ class RotaryEncoder:
         self.data_state = GPIO.input(self.data_pin)
         self.clock_state = GPIO.input(self.clock_pin)
 
-        self.counter = 0
-        # direction of movement, to eliminate half steps
-        self.direction = 0
-
         self.lock = threading.Lock()
 
     def read(self, channel):
