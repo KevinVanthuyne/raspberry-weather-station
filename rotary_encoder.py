@@ -49,4 +49,4 @@ class RotaryEncoder:
             sleep(0.01)
 
             if self.direction != 0:
-                print(self.direction)
+                return self.direction
