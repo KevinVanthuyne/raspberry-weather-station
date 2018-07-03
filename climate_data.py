@@ -84,7 +84,8 @@ class ClimateData:
         # This list can not update everytime because the forecasts won't be from
         # the start of the day when it's 13:00
 
-        min, max = None
+        min = None
+        max = None
 
         try:
             # Get 5 days of forecast info with data 3 hours apart
