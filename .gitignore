@@ -1,9 +1,7 @@
-temperatures.xlsx
-weatherdata.db
-dht22test.py
-matrixtest.py
 __pycache__/*
-log.txt
-interrupt-test.py
 nohup.out
-rotary-encoder-test.py
+*.log
+*test*.py
+*.xlsx
+*.db
+**/*.pyc

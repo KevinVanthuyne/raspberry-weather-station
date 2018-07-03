@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from PIL import Image
+from pathlib import Path
 
 class Page(ABC):
     """ abstract Page class containing a WeatherStation to display
@@ -18,8 +19,9 @@ class CurrentWeatherPage(Page):
     """ Page showing the current inside and outside temperatures,
         as well as the current weather icon """
 
-    def __init__(self, weather_station):
+    def __init__(self, weather_station, base_path):
         super().__init__(weather_station)
+        self.base_path = base_path
 
     def update(self):
         outside_temp = None
@@ -30,8 +32,8 @@ class CurrentWeatherPage(Page):
         if self.weather_station.weather_hour is not None:
             outside_temp = str(round(self.weather_station.outside_temp))
             # get the icon image to display
-            icon_path = "icons/{}.bmp".format(self.weather_station.icon[:2])
-            img = Image.open(icon_path)
+            icon_file = Path(self.base_path) / "{}.bmp".format(self.weather_station.icon[:2])
+            img = Image.open(icon_file)
 
         #if inside weather is available
         if self.weather_station.inside_temp is not None:

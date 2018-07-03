@@ -15,14 +15,14 @@ import pages as PAGES
 class WeatherStation:
     """ Facade class for all functionality of the weather station """
 
-    def __init__(self, DHT22_pin, lightsensor_pin, re_data, re_clock, re_switch, API_key, db_file):
+    def __init__(self, DHT22_pin, lightsensor_pin, re_data, re_clock, re_switch, API_key, db_file, base_path):
         """ Setup of all the components """
 
         self.screen = Screen()
         # Show info on screen to inform Pi is booting
         self.screen.display_text("BOOTING")
 
-        self.db = Database(db_file)
+        self.db = Database(db_file, base_path)
         # self.excel = Excel(excel_file_name)
 
         self.climate = ClimateData(DHT22_pin, API_key)
@@ -38,7 +38,7 @@ class WeatherStation:
 
         # setup different pages
         self.pages = []
-        self.pages.append(PAGES.CurrentWeatherPage(self))
+        self.pages.append(PAGES.CurrentWeatherPage(self, base_path))
         self.pages.append(PAGES.MinMaxTemperaturePage(self))
 
         # index of the current page

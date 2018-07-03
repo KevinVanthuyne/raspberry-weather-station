@@ -78,6 +78,12 @@ class ClimateData:
         return inside_humid, inside_temp
 
     def get_min_max(self):
+        """ Retrieves todays minimum and maximum temperature """
+        # TODO only shows min and max of first 3-hour forecast.
+        # get a list of todays forecasts only and get min and max from list.
+        # This list can not update everytime because the forecasts won't be from
+        # the start of the day when it's 13:00
+
         try:
             # Get 5 days of forecast info with data 3 hours apart
             forecaster = self.owm.three_hours_forecast_at_coords(self.coordinates[0], self.coordinates[1])

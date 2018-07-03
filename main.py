@@ -4,7 +4,8 @@ from weather_station import WeatherStation
 
 def main():
     """ Adjust these variables if needed ------------------------------------------------
-        All GPIO pin numbers are using BCM numbering """
+        All GPIO pin numbers are using BCM numbering.
+        Also change the icon path in the pages file """
 
     DHT22_pin = 15  # GPIO pin on Raspberry Pi for DHT22 sensor
     lightsensor_pin = 27  # GPIO pin connected to digital out of LM393 light sensor
@@ -16,10 +17,13 @@ def main():
     # Now using SQLite, if you prefer loggin to Excel, swap all Excel and Database lines
     db_file = 'weatherdata.db' # name of the database file
     # excel_file_name = '/home/pi/Programs/Weerstation/temperatures.xlsx'
+
+    # Full path to base folder of script (needed when executing script on boot)
+    base_path = '/home/pi/Programs/Weerstation/'
     """ --------------------------------------------------------------------------------- """
 
     # create the weather station
-    station = WeatherStation(DHT22_pin, lightsensor_pin, re_data, re_clock, re_switch, API_key, db_file)
+    station = WeatherStation(DHT22_pin, lightsensor_pin, re_data, re_clock, re_switch, API_key, db_file, base_path)
 
     """ Main loop """
     while True:

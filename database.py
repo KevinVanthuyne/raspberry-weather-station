@@ -4,15 +4,16 @@ class Database:
     """ Class to interact with SQLite database for storing all weather readings.
         Database needs to contain a table 'reading' """
 
-    def __init__(self, db_file):
+    def __init__(self, db_file, base_path):
         self.db_file = db_file  # name of the database file
+        self.base_path = base_path
 
     def create_connection(self):
         """ Create a connection to the database
             Preferably open and close a connection for every query,
             not keep the connection open the entire class lifetime """
         try:
-            connection = sqlite3.connect(self.db_file)
+            connection = sqlite3.connect(self.base_path + self.db_file)
             return connection
         except Error as e:
             print(e)
