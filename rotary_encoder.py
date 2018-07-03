@@ -4,6 +4,7 @@ from time import sleep
 
 class RotaryEncoder:
     """ Handling class for a rotary encoder """
+    # TODO turning encoder is unresponsive sometimes
 
     def __init__(self, data_pin, clock_pin, switch_pin):
         self.data_pin = data_pin  # DT pin (Out A)

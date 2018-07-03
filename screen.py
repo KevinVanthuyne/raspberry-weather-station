@@ -81,6 +81,13 @@ class Screen:
                 text(draw, (x1, 1), string[:divide], fill="white", font=TINY_FONT)
                 text(draw, (x2, 7), string[divide:], fill="white", font=TINY_FONT)
 
+    def display_bitmap(self, img):
+        """ display a 16x16 monochrome bitmap in the center of the screen """
+
+        with canvas(self.device) as draw:
+            if img is not None:
+                draw.bitmap((4,0), img, fill="white")
+
     def calculate_x_pos(self, amount_of_characters):
         """ calculate the x position so that the string can be centered horizontally
             according to the amount of character """

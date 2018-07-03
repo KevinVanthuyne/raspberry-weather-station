@@ -40,6 +40,7 @@ class WeatherStation:
         self.pages = []
         self.pages.append(PAGES.CurrentWeatherPage(self, base_path))
         self.pages.append(PAGES.MinMaxTemperaturePage(self))
+        self.pages.append(PAGES.SettingsPage(self, base_path))
 
         # index of the current page
         self.current_page = 0
