@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 from PIL import Image
 from pathlib import Path
+from datetime import datetime
+import os
+import time
 
 class Page(ABC):
     """ abstract Page class containing a WeatherStation to display
@@ -67,14 +70,10 @@ class MinMaxTemperaturePage(Page):
     def update(self):
         # if currently on the main MinMax page
         if self.current_page == None:
-            outside_temp = None
-            inside_temp = None
-            img = None
-
             # if a forecast is available
-            if self.weather_station.today_min is not None:
-                min = "Min:{}".format(str(round(self.weather_station.today_min)))
-                max = "Max:{}".format(str(round(self.weather_station.today_max)))
+            if self.weather_station.coldest is not None:
+                min = "Min:{}".format(str(round(self.weather_station.coldest.get_temperature(unit='celsius')['temp_min'])))
+                max = "Max:{}".format(str(round(self.weather_station.hottest.get_temperature(unit='celsius')['temp_max'])))
 
             self.weather_station.screen.display_top_bottom(min, max)
 
@@ -103,7 +102,15 @@ class MinMaxHoursPage(Page):
         super().__init__(weather_station)
 
     def update(self):
-        self.weather_station.screen.display_text("Time")
+        # if a forecast is available
+        if self.weather_station.coldest is not None:
+            min_hour = self.weather_station.coldest.get_reference_time()
+            min_hour = datetime.fromtimestamp(min_hour).strftime('%H:%M')
+
+            max_hour = self.weather_station.hottest.get_reference_time()
+            max_hour = datetime.fromtimestamp(max_hour).strftime('%H:%M')
+
+        self.weather_station.screen.display_top_bottom(str(min_hour), str(max_hour))
 
     def click(self):
         print("MinMaxHoursPage clicked")
@@ -121,6 +128,7 @@ class SettingsPage(Page):
 
         # setup subpages
         self.pages.append(ShutdownPage(weather_station))
+        self.pages.append(RebootPage(weather_station))
         self.pages.append(BackPage(weather_station))
 
     def update(self):
@@ -149,17 +157,50 @@ class SettingsPage(Page):
                 self.current_page = None
 
 class ShutdownPage(Page):
-    """ A page under the SettingsPage showing 'shutdown?'
-        that shuts down the Raspberry when clicked """
+    """ A page showing 'shutdown?' that shuts down the Raspberry when clicked """
 
     def __init__(self, weather_station):
         super().__init__(weather_station)
 
     def update(self):
-        self.weather_station.screen.display_text("Shutdown?")
+        self.weather_station.screen.display_text("SHUTDOWN")
 
     def click(self):
         print("Shutdown clicked")
+        self.weather_station.screen.display_text(".")
+        time.sleep(0.2)
+        self.weather_station.screen.display_text("..")
+        time.sleep(0.2)
+        self.weather_station.screen.display_text("...")
+        time.sleep(0.2)
+        self.weather_station.screen.display_text("....")
+        time.sleep(0.2)
+        self.weather_station.screen.display_text("")
+
+        os.system("sudo shutdown -h now")
+
+class RebootPage(Page):
+    """ A page showing 'reboot?' that reboots the Raspberry when clicked """
+
+    def __init__(self, weather_station):
+        super().__init__(weather_station)
+
+    def update(self):
+        self.weather_station.screen.display_text("REBOOT")
+
+    def click(self):
+        print("Reboot clicked")
+        self.weather_station.screen.display_text(".")
+        time.sleep(0.2)
+        self.weather_station.screen.display_text("..")
+        time.sleep(0.2)
+        self.weather_station.screen.display_text("...")
+        time.sleep(0.2)
+        self.weather_station.screen.display_text("....")
+        time.sleep(0.2)
+        self.weather_station.screen.display_text("")
+
+        os.system("sudo reboot")
 
 """ ---------------------------------------------------------
         Common pages
@@ -172,7 +213,7 @@ class BackPage(Page):
         super().__init__(weather_station)
 
     def update(self):
-        self.weather_station.screen.display_text("BACK?")
+        self.weather_station.screen.display_text("BACK")
 
     def click(self):
         print("Back clicked")

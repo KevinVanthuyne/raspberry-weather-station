@@ -56,8 +56,8 @@ class WeatherStation:
         # update inside data
         self.inside_humid, self.inside_temp = self.climate.get_inside_data()
 
-        # update today's forcast data
-        self.today_min, self.today_max = self.climate.get_min_max()
+        # update today's forecast data
+        self.coldest, self.hottest = self.climate.get_min_max()
 
         # update day & time of WeatherStation data with current day & time
         now = datetime.datetime.now()

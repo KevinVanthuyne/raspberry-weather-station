@@ -78,9 +78,8 @@ class ClimateData:
         return inside_humid, inside_temp
 
     def get_min_max(self):
-        """ Retrieves todays minimum and maximum temperature. Doesn't keep min
-            and max from earlier in the day"""
-        # TODO show time of min and max when clicking while on minmax page
+        """ Retrieves todays weather forecasts with minimum and maximum temperature.
+            Doesn't keep min and max from earlier in the day"""
 
         min = None
         max = None
@@ -112,7 +111,7 @@ class ClimateData:
         except exceptions.api_call_error.APICallError:
             print("System offline")
 
-        return min, max
+        return coldest, hottest
 
     def get_forecasts_of_day(self, weathers, date):
         """ takes a list of weather objects contained by a forecast object and
