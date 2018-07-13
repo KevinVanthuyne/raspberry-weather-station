@@ -78,11 +78,9 @@ class ClimateData:
         return inside_humid, inside_temp
 
     def get_min_max(self):
-        """ Retrieves todays minimum and maximum temperature """
-        # TODO only shows min and max of first 3-hour forecast.
-        # get a list of todays forecasts only and get min and max from list.
-        # This list can not update everytime because the forecasts won't be from
-        # the start of the day when it's 13:00
+        """ Retrieves todays minimum and maximum temperature. Doesn't keep min
+            and max from earlier in the day"""
+        # TODO show time of min and max when clicking while on minmax page
 
         min = None
         max = None
@@ -94,34 +92,21 @@ class ClimateData:
             forecast = forecaster.get_forecast()
             weathers = forecast.get_weathers()
 
-            print("Weathers: {}".format(forecast.count_weathers()))
+            # get forecasts of today
+            today = datetime.datetime.now() #+ datetime.timedelta(days=1)
+            todays_weathers = self.get_forecasts_of_day(weathers, today)
 
-            # get forecasts of tomorrow
-            tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
-            self.get_forecasts_of_day(weathers, tomorrow)
+            # select hottest and coldest weathers
+            hottest = self.hottest_weather(todays_weathers)
+            max = hottest.get_temperature(unit='celsius')['temp_max']
 
-            """
-            # get weather object from forecaster closest to now
-            # weather = forecaster.get_weather_at(datetime.datetime.now())
-            weather = forecaster.get_forecast().get(0)
-
-            # get the day and time of the retrieved weather
-            timestamp = weather.get_reference_time()
-            weather_day = datetime.datetime.fromtimestamp(timestamp).strftime('%d/%m/%Y')
-            weather_hour = datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S')
-
-            # get the temperature info of the forecast
-            temp = weather.get_temperature(unit = 'celsius')
+            coldest = self.coldest_weather(todays_weathers)
+            min = coldest.get_temperature(unit='celsius')['temp_min']
 
             # print some info
-            print("Min and max temperatures retrieved are from: {} {}".format(weather_day, weather_hour))
-            print("Min: {}".format(temp['temp_min']))
-            print("Max: {}".format(temp['temp_max']))
+            print("Min: {} (at {})".format(min, coldest.get_reference_time(timeformat='iso')))
+            print("Max: {} (at {})".format(max, hottest.get_reference_time(timeformat='iso')))
             print("")
-
-            min = temp['temp_min']
-            max = temp['temp_max']
-            """
 
         # if the system is offline/API is not available
         except exceptions.api_call_error.APICallError:
@@ -132,8 +117,6 @@ class ClimateData:
     def get_forecasts_of_day(self, weathers, date):
         """ takes a list of weather objects contained by a forecast object and
             returns only the weathers for the day given by the datetime object """
-
-        print(date)
 
         # list of weathers to return
         selection = []
@@ -148,3 +131,25 @@ class ClimateData:
                 print("Selected: {}".format(ref_time))
 
         return selection
+
+    def hottest_weather(self, weathers):
+        """ returns the weather with the highest max temperature, given a list of weathers """
+
+        max = weathers[0]
+
+        for weather in weathers:
+            if weather.get_temperature(unit='celsius')['temp_max'] > max.get_temperature(unit='celsius')['temp_max']:
+                max = weather
+
+        return max
+
+    def coldest_weather(self, weathers):
+        """ returns the weather with the lowest min temperature, given a list of weathers """
+
+        min = weathers[0]
+
+        for weather in weathers:
+            if weather.get_temperature(unit='celsius')['temp_min'] < min.get_temperature(unit='celsius')['temp_min']:
+                min = weather
+
+        return min
