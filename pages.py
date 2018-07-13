@@ -52,30 +52,64 @@ class CurrentWeatherPage(Page):
     def click(self):
         print("CurrentWeatherPage clicked")
 
+""" ---------------------------------------------------------
+        Min max pages
+    --------------------------------------------------------- """
+
 class MinMaxTemperaturePage(Page):
     """ Page showing the minimum and maximum temperature of today """
 
     def __init__(self, weather_station):
         super().__init__(weather_station)
+        # setup subpages
+        self.pages.append(MinMaxHoursPage(weather_station))
 
     def update(self):
-        outside_temp = None
-        inside_temp = None
-        img = None
+        # if currently on the main MinMax page
+        if self.current_page == None:
+            outside_temp = None
+            inside_temp = None
+            img = None
 
-        # if a forecast is available
-        if self.weather_station.today_min is not None:
-            min = "Min:{}".format(str(round(self.weather_station.today_min)))
-            max = "Max:{}".format(str(round(self.weather_station.today_max)))
+            # if a forecast is available
+            if self.weather_station.today_min is not None:
+                min = "Min:{}".format(str(round(self.weather_station.today_min)))
+                max = "Max:{}".format(str(round(self.weather_station.today_max)))
 
-        self.weather_station.screen.display_top_bottom(min, max)
-        print("Screen updated.")
+            self.weather_station.screen.display_top_bottom(min, max)
+
+        # if on a subpage, redirect update to the subpage
+        else:
+            self.pages[self.current_page].update()
 
     def click(self):
-        print("Min max clicked")
+        # if clicked on main page, go to the first subpage
+        if self.current_page == None:
+            self.current_page = 0
+        # if clicked when not on main page, redirect click to subpage
+        else:
+            subpage = self.pages[self.current_page]
+            # redirect click to subpage
+            subpage.click()
+
+            # if clicked on the BackPage, go back to the main page
+            if type(subpage) is MinMaxHoursPage:
+                self.current_page = None
+
+class MinMaxHoursPage(Page):
+    """ Page showing at what time the min and max temperatures will be reached """
+
+    def __init__(self, weather_station):
+        super().__init__(weather_station)
+
+    def update(self):
+        self.weather_station.screen.display_text("Time")
+
+    def click(self):
+        print("MinMaxHoursPage clicked")
 
 """ ---------------------------------------------------------
-        Settings
+        Settings pages
     --------------------------------------------------------- """
 
 class SettingsPage(Page):
@@ -126,6 +160,10 @@ class ShutdownPage(Page):
 
     def click(self):
         print("Shutdown clicked")
+
+""" ---------------------------------------------------------
+        Common pages
+    --------------------------------------------------------- """
 
 class BackPage(Page):
     """ A page showing 'back?' that returns to the main page when clicked """
