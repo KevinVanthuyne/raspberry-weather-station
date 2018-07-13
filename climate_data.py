@@ -91,6 +91,16 @@ class ClimateData:
             # Get 5 days of forecast info with data 3 hours apart
             forecaster = self.owm.three_hours_forecast_at_coords(self.coordinates[0], self.coordinates[1])
 
+            forecast = forecaster.get_forecast()
+            weathers = forecast.get_weathers()
+
+            print("Weathers: {}".format(forecast.count_weathers()))
+
+            # get forecasts of tomorrow
+            tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
+            self.get_forecasts_of_day(weathers, tomorrow)
+
+            """
             # get weather object from forecaster closest to now
             # weather = forecaster.get_weather_at(datetime.datetime.now())
             weather = forecaster.get_forecast().get(0)
@@ -111,10 +121,30 @@ class ClimateData:
 
             min = temp['temp_min']
             max = temp['temp_max']
+            """
 
         # if the system is offline/API is not available
         except exceptions.api_call_error.APICallError:
             print("System offline")
 
         return min, max
-    # TODO def get_today_forecast_min_temp(forecaster):
+
+    def get_forecasts_of_day(self, weathers, date):
+        """ takes a list of weather objects contained by a forecast object and
+            returns only the weathers for the day given by the datetime object """
+
+        print(date)
+
+        # list of weathers to return
+        selection = []
+
+        for weather in weathers:
+            # get the reference time of the weather object as a datetime object
+            ref_time = weather.get_reference_time(timeformat='date')
+
+            # if the weather's day equals the given date
+            if date.day == ref_time.day and date.month == ref_time.month and date.year == ref_time.year:
+                selection.append(weather)
+                print("Selected: {}".format(ref_time))
+
+        return selection
