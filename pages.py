@@ -106,7 +106,13 @@ class SettingsPage(Page):
             self.current_page = 0
         # if clicked when not on settings page, redirect click to subpage
         else:
-            self.pages[self.current_page].click()
+            subpage = self.pages[self.current_page]
+            # redirect click to subpage
+            subpage.click()
+
+            # if clicked on the BackPage, go back to the main page
+            if type(subpage) is BackPage:
+                self.current_page = None
 
 class ShutdownPage(Page):
     """ A page under the SettingsPage showing 'shutdown?'
@@ -122,14 +128,13 @@ class ShutdownPage(Page):
         print("Shutdown clicked")
 
 class BackPage(Page):
-    """ A page under the SettingsPage showing 'back?'
-        that returns to the SettingsPage when clicked """
+    """ A page showing 'back?' that returns to the main page when clicked """
 
     def __init__(self, weather_station):
         super().__init__(weather_station)
 
     def update(self):
-        self.weather_station.screen.display_text("Back?")
+        self.weather_station.screen.display_text("BACK?")
 
     def click(self):
         print("Back clicked")
