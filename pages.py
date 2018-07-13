@@ -9,6 +9,8 @@ class Page(ABC):
     @abstractmethod
     def __init__(self, weather_station):
         self.weather_station = weather_station
+        self.pages = []  # list of subpages
+        self.current_page = None  # index of the current subpage (None = main page, 1 = first sub page)
 
     @abstractmethod
     def update(self):
@@ -72,6 +74,10 @@ class MinMaxTemperaturePage(Page):
     def click(self):
         print("Min max clicked")
 
+""" ---------------------------------------------------------
+        Settings
+    --------------------------------------------------------- """
+
 class SettingsPage(Page):
     """ A page containing different settings and shutdown option """
 
@@ -79,11 +85,51 @@ class SettingsPage(Page):
         super().__init__(weather_station)
         self.base_path = base_path
 
+        # setup subpages
+        self.pages.append(ShutdownPage(weather_station))
+        self.pages.append(BackPage(weather_station))
+
     def update(self):
-        # get the cogwheel image to display
-        icon_file = Path(self.base_path) / "icons/cog.bmp"
-        img = Image.open(icon_file)
-        self.weather_station.screen.display_bitmap(img)
+        # if currently on the main settings page, show cogwheel
+        if self.current_page == None:
+            # get the cogwheel image to display
+            icon_file = Path(self.base_path) / "icons/cog.bmp"
+            img = Image.open(icon_file)
+            self.weather_station.screen.display_bitmap(img)
+        # if on a subpage, redirect update to the subpage
+        else:
+            self.pages[self.current_page].update()
 
     def click(self):
-        print("SettingsPage clicked")
+        # if clicked on settings page, go to the first subpage
+        if self.current_page == None:
+            self.current_page = 0
+        # if clicked when not on settings page, redirect click to subpage
+        else:
+            self.pages[self.current_page].click()
+
+class ShutdownPage(Page):
+    """ A page under the SettingsPage showing 'shutdown?'
+        that shuts down the Raspberry when clicked """
+
+    def __init__(self, weather_station):
+        super().__init__(weather_station)
+
+    def update(self):
+        self.weather_station.screen.display_text("Shutdown?")
+
+    def click(self):
+        print("Shutdown clicked")
+
+class BackPage(Page):
+    """ A page under the SettingsPage showing 'back?'
+        that returns to the SettingsPage when clicked """
+
+    def __init__(self, weather_station):
+        super().__init__(weather_station)
+
+    def update(self):
+        self.weather_station.screen.display_text("Back?")
+
+    def click(self):
+        print("Back clicked")

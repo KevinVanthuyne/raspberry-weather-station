@@ -97,29 +97,55 @@ class WeatherStation:
     def rotary_encoder_changed(self, channel):
         result = self.rotary.read(channel)
 
+        # current page object
+        page = self.pages[self.current_page]
+
         # show next page
         if result == 1:
-            # if the index is at the last page, loop back to first page
-            if self.current_page == len(self.pages) - 1:
-                self.current_page = 0
+            # if the current page is not browsing its sub pages, go to next main page
+            if page.current_page == None:
+                # if the index is at the last page, loop back to first page
+                if self.current_page == len(self.pages) - 1:
+                    self.current_page = 0
+                else:
+                    self.current_page += 1
+                print("Main page up")
+
+            # if the current page is browsing its sub pages, go to next subpage
             else:
-                self.current_page += 1
-            print("Page up")
-            self.update_screen()
+                # if the index is at the last page, loop back to first page
+                if page.current_page == len(page.pages) - 1:
+                    page.current_page = 0
+                else:
+                    page.current_page += 1
+                print("Sub page up")
 
         # show previous page
         elif result == -1:
-            # if the index is at the first page, loop back to last page
-            if self.current_page == 0:
-                self.current_page = len(self.pages) - 1
+            # if the current page is not browsing its sub pages, go to previous main page
+            if page.current_page == None:
+                # if the index is at the first page, loop back to last page
+                if self.current_page == 0:
+                    self.current_page = len(self.pages) - 1
+                else:
+                    self.current_page -= 1
+                print("Main page down")
+
+            # if the current page is browsing its sub pages, go to previous subpage
             else:
-                self.current_page -= 1
-            print("Page down")
-            self.update_screen()
+                # if the index is at the last page, loop back to last page
+                if page.current_page == 0:
+                    page.current_page = len(page.pages) - 1
+                else:
+                    page.current_page -= 1
+                print("Sub page down")
+
+        self.update_screen()
 
     def rotary_encoder_clicked(self, channel):
-        """ directs the click to a handler method of the current page """
+        """ directs the click to a handler method of the current page and updates screen """
         self.pages[self.current_page].click()
+        self.pages[self.current_page].update()
 
     def log_to_db(self):
         """ Log the current weather station data to the database
