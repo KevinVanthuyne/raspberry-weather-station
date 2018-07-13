@@ -15,6 +15,11 @@ class Page(ABC):
         """ update the information shown on the page """
         pass
 
+    @abstractmethod
+    def click(self):
+        """ handler method when a page is clicked """
+        pass
+
 class CurrentWeatherPage(Page):
     """ Page showing the current inside and outside temperatures,
         as well as the current weather icon """
@@ -42,6 +47,9 @@ class CurrentWeatherPage(Page):
         self.weather_station.screen.display(outside_temp, inside_temp, img)
         print("Screen updated.")
 
+    def click(self):
+        print("CurrentWeatherPage clicked")
+
 class MinMaxTemperaturePage(Page):
     """ Page showing the minimum and maximum temperature of today """
 
@@ -61,6 +69,9 @@ class MinMaxTemperaturePage(Page):
         self.weather_station.screen.display_top_bottom(min, max)
         print("Screen updated.")
 
+    def click(self):
+        print("Min max clicked")
+
 class SettingsPage(Page):
     """ A page containing different settings and shutdown option """
 
@@ -73,3 +84,6 @@ class SettingsPage(Page):
         icon_file = Path(self.base_path) / "icons/cog.bmp"
         img = Image.open(icon_file)
         self.weather_station.screen.display_bitmap(img)
+
+    def click(self):
+        print("SettingsPage clicked")

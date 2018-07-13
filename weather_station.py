@@ -35,6 +35,7 @@ class WeatherStation:
         # setup interrupts for rotary encoder is turned
         GPIO.add_event_detect(re_data, GPIO.RISING, callback=self.rotary_encoder_changed)
         GPIO.add_event_detect(re_clock, GPIO.RISING, callback=self.rotary_encoder_changed)
+        GPIO.add_event_detect(re_switch, GPIO.FALLING, callback=self.rotary_encoder_clicked, bouncetime=200)
 
         # setup different pages
         self.pages = []
@@ -116,6 +117,9 @@ class WeatherStation:
             print("Page down")
             self.update_screen()
 
+    def rotary_encoder_clicked(self, channel):
+        """ directs the click to a handler method of the current page """
+        self.pages[self.current_page].click()
 
     def log_to_db(self):
         """ Log the current weather station data to the database
