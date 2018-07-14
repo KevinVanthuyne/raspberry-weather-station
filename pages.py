@@ -75,7 +75,9 @@ class MinMaxTemperaturePage(Page):
                 min = "Min:{}".format(str(round(self.weather_station.coldest.get_temperature(unit='celsius')['temp_min'])))
                 max = "Max:{}".format(str(round(self.weather_station.hottest.get_temperature(unit='celsius')['temp_max'])))
 
-            self.weather_station.screen.display_top_bottom(min, max)
+                self.weather_station.screen.display_top_bottom(min, max)
+            else:
+                self.weather_station.screen.display_top_bottom("Min Max", "error")
 
         # if on a subpage, redirect update to the subpage
         else:
@@ -110,7 +112,9 @@ class MinMaxHoursPage(Page):
             max_hour = self.weather_station.hottest.get_reference_time()
             max_hour = datetime.fromtimestamp(max_hour).strftime('%H:%M')
 
-        self.weather_station.screen.display_top_bottom(str(min_hour), str(max_hour))
+            self.weather_station.screen.display_top_bottom(str(min_hour), str(max_hour))
+        else:
+            self.weather_station.screen.display_top_bottom("Hours", "error")
 
     def click(self):
         print("MinMaxHoursPage clicked")

@@ -134,21 +134,28 @@ class ClimateData:
     def hottest_weather(self, weathers):
         """ returns the weather with the highest max temperature, given a list of weathers """
 
-        max = weathers[0]
+        # if weathers is not empty, process list
+        if weathers:
+            max = weathers[0]
 
-        for weather in weathers:
-            if weather.get_temperature(unit='celsius')['temp_max'] > max.get_temperature(unit='celsius')['temp_max']:
-                max = weather
+            for weather in weathers:
+                if weather.get_temperature(unit='celsius')['temp_max'] > max.get_temperature(unit='celsius')['temp_max']:
+                    max = weather
 
-        return max
+            return max
+        else:
+            return None
 
     def coldest_weather(self, weathers):
         """ returns the weather with the lowest min temperature, given a list of weathers """
 
-        min = weathers[0]
+        if weathers:
+            min = weathers[0]
 
-        for weather in weathers:
-            if weather.get_temperature(unit='celsius')['temp_min'] < min.get_temperature(unit='celsius')['temp_min']:
-                min = weather
+            for weather in weathers:
+                if weather.get_temperature(unit='celsius')['temp_min'] < min.get_temperature(unit='celsius')['temp_min']:
+                    min = weather
 
-        return min
+            return min
+        else:
+            return None

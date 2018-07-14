@@ -64,8 +64,6 @@ class WeatherStation:
         self.day = now.date()
         self.hour = now.time()
 
-        # TODO update all pages with current weatherstation?
-
         print("Weather station updated at: {} {}".format(self.hour, self.day))
 
 
