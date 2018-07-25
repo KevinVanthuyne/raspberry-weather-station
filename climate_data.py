@@ -81,8 +81,8 @@ class ClimateData:
         """ Retrieves todays weather forecasts with minimum and maximum temperature.
             Doesn't keep min and max from earlier in the day"""
 
-        min = None
-        max = None
+        coldest = None
+        hottest = None
 
         try:
             # Get 5 days of forecast info with data 3 hours apart
