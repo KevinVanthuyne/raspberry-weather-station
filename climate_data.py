@@ -97,15 +97,18 @@ class ClimateData:
 
             # select hottest and coldest weathers
             hottest = self.hottest_weather(todays_weathers)
-            max = hottest.get_temperature(unit='celsius')['temp_max']
-
             coldest = self.coldest_weather(todays_weathers)
-            min = coldest.get_temperature(unit='celsius')['temp_min']
 
-            # print some info
-            print("Min: {} (at {})".format(min, coldest.get_reference_time(timeformat='iso')))
-            print("Max: {} (at {})".format(max, hottest.get_reference_time(timeformat='iso')))
-            print("")
+            # if hottest and coldest forecast are available
+            if hottest and coldest:
+                min = coldest.get_temperature(unit='celsius')['temp_min']
+                max = hottest.get_temperature(unit='celsius')['temp_max']
+                # print some info
+                print("Min: {} (at {})".format(min, coldest.get_reference_time(timeformat='iso')))
+                print("Max: {} (at {})".format(max, hottest.get_reference_time(timeformat='iso')))
+                print("")
+            else:
+                print("Couldn't get min/max")
 
         # if the system is offline/API is not available
         except exceptions.api_call_error.APICallError:
