@@ -4,13 +4,19 @@ Uses SQLite to log all the data.
 
 ## Setup
 
+Install the necessary packages.
+- [luma.led_matrix](https://github.com/rm-hull/luma.led_matrix)
+- [pyowm](https://github.com/csparpa/pyowm)
+- [Adafruit_Python_DHT](https://github.com/adafruit/Adafruit_Python_DHT)
+- SQLite3 or Openpyxl if needed
+
 Add the weatherstation script to run on boot with a cronjob: `crontab -e`
 Add the following contents to the file. This outputs all console output to a log file.
 ```
 @reboot python3 -u <path-to-script>/main.py > <path-to-script>/weatherstation.log 2>&1 &
 ```
 
-Give the Raspberry a static ip address for easy access. Open the dhcp config file with `sudo nano /etc/dhcpcd.conf`.
+Optional: give the Raspberry a static ip address for easy access. Open the dhcp config file with `sudo nano /etc/dhcpcd.conf`.
 Add the following contents to the file, replacing x and y values according to your situation:
 ```
 interface eth0
